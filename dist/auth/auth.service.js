@@ -19,6 +19,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const user_entity_1 = require("./user.entity");
 const bcrypt = require("bcryptjs");
+const class_transformer_1 = require("class-transformer");
 let AuthService = class AuthService {
     userRepository;
     jwtService;
@@ -30,7 +31,9 @@ let AuthService = class AuthService {
         const { email, password, name } = createUserDto;
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = this.userRepository.create({ email, password: hashedPassword, name });
-        return this.userRepository.save(user);
+        await this.userRepository.save(user);
+        const plainUser = (0, class_transformer_1.instanceToPlain)(user);
+        return (0, class_transformer_1.plainToClass)(user_entity_1.User, plainUser);
     }
     async login(loginDto) {
         const { email, password } = loginDto;

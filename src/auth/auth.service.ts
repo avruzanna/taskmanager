@@ -6,6 +6,7 @@ import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcryptjs';
+import { instanceToPlain, plainToClass } from 'class-transformer';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +20,10 @@ export class AuthService {
     const { email, password, name } = createUserDto;
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = this.userRepository.create({ email, password: hashedPassword, name });
-    return this.userRepository.save(user);
+    await this.userRepository.save(user);
+    const plainUser = instanceToPlain(user);
+    return plainToClass(User, plainUser);
+
   }
 
   async login(loginDto: LoginDto): Promise<{ access_token: string }> {
